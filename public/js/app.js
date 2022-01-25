@@ -146,6 +146,21 @@ __webpack_require__.r(__webpack_exports__);
         swalWarning('لطفا لینک محصول را وارد کنید!', false);
         return;
       }
+
+      this.loading = true;
+      var data = {
+        digikala_link: this.digikalaLink
+      };
+      ajaxPost('/ajax/import-product', data).done(function (resp) {
+        this.loading = false;
+
+        if (resp.ok) {} else {
+          swalWarning(resp.msg);
+        }
+      }.bind(this)).fail(function (err) {
+        this.loading = false;
+        swalConnectionError();
+      }.bind(this));
     }
   }
 });
@@ -21561,7 +21576,7 @@ var render = function () {
                     expression: "digikalaLink",
                   },
                 ],
-                staticClass: "form-control",
+                staticClass: "form-control en-input",
                 attrs: {
                   disabled: _vm.loading,
                   type: "text",

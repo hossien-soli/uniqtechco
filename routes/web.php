@@ -7,3 +7,7 @@ Route::as('main.')->group(function () {
     Route::get('/products',['as' => 'products','uses' => 'MainController@products']);
     Route::get('/import',['as' => 'import','uses' => 'MainController@import']);
 });
+
+Route::prefix('/ajax')->group(function () {
+    Route::post('/import-product','AjaxController@importProduct');
+});
