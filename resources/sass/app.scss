@@ -1,8 +1,39 @@
-// Fonts
-@import url('https://fonts.googleapis.com/css?family=Nunito');
 
-// Variables
-@import 'variables';
+$main-color: #460a8b;
+$light-main-color-1x: #4d0c97;
+$grad-main-color: linear-gradient(90deg, $main-color 0%, $light-main-color-1x 100%);
+$secondary-color: $light-main-color-1x;
 
-// Bootstrap
-@import '~bootstrap/scss/bootstrap';
+@import "./fonts";
+
+@import './custom-bootstrap/bootstrap';
+
+* {
+    font-family: samim;
+}
+body {
+    background-color: rgba(0,0,0,0.02);
+}
+.font-samim-medium {
+    font-family: samim_medium !important;
+}
+.font-samim-bold {
+    font-family: samim_bold !important;
+}
+
+.rtl {
+    direction: rtl !important;
+}
+
+.rtl-t {
+    text-align: right;
+    direction: rtl !important;
+}
+
+.ltr {
+    text-align: left;
+    direction: ltr !important;
+}
+
+@import '~sweetalert2/src/sweetalert2.scss';
+@import "fontawesome_full_solid";
