@@ -17,6 +17,22 @@ const router = new VueRouter({
     mode: 'history',
 });
 
+function setDocTitle (routeName) {
+    var pageTitles = {
+        'main.index': 'یونیتک',
+        'main.products': 'لیست محصولات',
+        'main.import': 'ثبت محصول جدید',  
+    };
+    var docTitle = pageTitles[routeName];
+    if (typeof docTitle != "undefined") { document.title = docTitle; }
+    else { document.title = 'یونیتک'; }
+}
+
+router.afterEach(function (to,from) {
+    setDocTitle(to.name);
+});
+
 const app = new Vue({
     el: '#vueApp',
+    router,
 });

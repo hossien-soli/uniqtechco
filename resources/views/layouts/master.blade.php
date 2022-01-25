@@ -12,10 +12,10 @@
     @yield('head_links')
 </head>
 <body>
-    <div id="vueApp">
+    <div class="rtl-t" id="vueApp">
         @yield('content')
     </div>
-    
+
     @yield('end_links')
 </body>
 </html>

@@ -14,11 +14,13 @@ class MainController extends Controller
 
     public function products ()
     {
-        
+        $title = "لیست محصولات";
+        return view('main.common',compact('title'));
     }
 
     public function import ()
     {
-
+        $title = "ثبت محصول جدید";
+        return view('main.common',compact('title'));
     }
 }
