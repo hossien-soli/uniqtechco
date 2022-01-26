@@ -1,16 +1,9 @@
 <template>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">Example Component</div>
-
-                    <div class="card-body">
-                        I'm an example component.
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="container text-center py-5">
+        <h2>این بخش هنوز آماده نشده است لطفا به بخش ثبت محصول بروید!</h2>
+        <router-link class="font-samim-bold" :to="{name: 'main.index'}">
+            <i class="fa fa-arrow-left"></i> برگشت به غقب
+        </router-link>
     </div>
 </template>
 

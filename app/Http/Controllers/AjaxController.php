@@ -144,8 +144,8 @@ class AjaxController extends Controller
             'status' => $alsoPublish == 1 ? 1 : 0,
         ]);
 
-        if (!file_exists('products')) { mkdir('products'); }
-        mkdir('products/'.$productUniqId);
+        if (!file_exists('product_images')) { mkdir('product_images'); }
+        mkdir('product_images/'.$productUniqId);
 
         $imageArr = $importProduct['image_arr'] ? $importProduct['image_arr'] : [];
         if ($imageFilter) {
@@ -162,7 +162,7 @@ class AjaxController extends Controller
                 $imageData = Http::get($imageArr[$i]);
                 if ($imageData->successful() && $imageData) {
                     $imageLocalName = uniqid();
-                    file_put_contents('products/'.$productUniqId.'/'.$imageLocalName,$imageData);
+                    file_put_contents('product_images/'.$productUniqId.'/'.$imageLocalName,$imageData);
                     $product->images()->create([
                         'name' => $imageLocalName,
                         'link_on_digikala' => $imageArr[$i],
