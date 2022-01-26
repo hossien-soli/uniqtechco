@@ -429,6 +429,12 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   mounted: function mounted() {
     console.log('Component mounted.');
@@ -22389,8 +22395,27 @@ var staticRenderFns = [
     return _c("div", { staticClass: "alert font-samim-medium alert-primary" }, [
       _c("i", { staticClass: "fa fa-question" }),
       _vm._v(
-        "\n        باتشکر از شما، این پروژه قرار بود از زبان انگلیسی و فارسی به صورت هم زمان پشتیبانی کند اما به دلیل نبود زمان کافی این اتفاق نیوفتاد. و در صورت تمایل این امکان میتواند به پروژه باز برای تست اضافه شود!\n    "
+        "\n        باتشکر از شما، این پروژه قرار بود از زبان انگلیسی و فارسی به صورت هم زمان پشتیبانی کند اما به دلیل نبود زمان کافی این اتفاق نیوفتاد. و در صورت تمایل این امکان میتواند به پروژه باز برای تست اضافه شود!\n        "
       ),
+      _c("br", { staticClass: "mb-1" }),
+      _vm._v(" "),
+      _c("i", { staticClass: "fa fa-arrow-left" }),
+      _vm._v(" "),
+      _c("span", { staticClass: "font-samim-bold" }, [
+        _vm._v(
+          "همچنین به دلیل نبود وقت کافی از آنجایی که این سیستم با ویو جی اس طراحی شده است و کمی زمان بر است بخش نمایش محصولات نیز تکمیل نشده است اما بخش ثبت محصول و وارد کردن محصول از دیجی کالا کاملا تکمیل شده است! همچنین در صورت تمایل به تکمیل بخش نمایش محصولات لطفا اطلاع دهدید تا تکمیل شود!"
+        ),
+      ]),
+      _vm._v(" "),
+      _c("br", { staticClass: "mb-1" }),
+      _vm._v(" "),
+      _c("i", { staticClass: "fa fa-arrow-left" }),
+      _vm._v(" "),
+      _c("span", [
+        _vm._v(
+          "در این سیستم تمامی تصاویر محصول از دیجی کالا دریافت شده و در سشن ذخیره میشوند و سپس بعد از پیش نمایش محصول و فیلتر تصاویر و تکمیل اطلاعات محصول تصاویر از دیجی کالا دانلود شده و در سیستم داخلی ذخیره میشوند و همچنین اطلاعات فیلم در دیتابیس مربوطه ثبت میشوند!"
+        ),
+      ]),
     ])
   },
 ]
@@ -22426,12 +22451,12 @@ var render = function () {
       _c(
         "router-link",
         {
-          staticClass: "font-samim-bold",
+          staticClass: "btn btn-primary font-samim-bold px-5 mt-3",
           attrs: { to: { name: "main.index" } },
         },
         [
-          _c("i", { staticClass: "fa fa-arrow-left" }),
-          _vm._v(" برگشت به غقب\n    "),
+          _c("i", { staticClass: "fa fa-arrow-right ml-1" }),
+          _vm._v(" برگشت به عقب\n    "),
         ]
       ),
     ],
