@@ -13,10 +13,10 @@
                     <div class="row">
                         <div class="col-7">
                             <button :disabled="loading" class="btn btn-block btn-primary" type="submit">
-                                <i v-show="!loading" class="fa ml-1 fa-check"></i>
-                                <i v-show="loading" class="fa ml-1 fa-spin fa-spinner"></i>
-                                <span class="font-samim-bold" v-show="!loading">دریافت و نمایش اطلاعات فیلم</span>
-                                <span class="font-samim-medium" v-show="loading">لطفا صبر کنید ...</span>
+                                <i v-show="!importLoading" class="fa ml-1 fa-check"></i>
+                                <i v-show="importLoading" class="fa ml-1 fa-spin fa-spinner"></i>
+                                <span class="font-samim-bold" v-show="!importLoading">دریافت و نمایش اطلاعات فیلم</span>
+                                <span class="font-samim-medium" v-show="importLoading">لطفا صبر کنید ...</span>
                             </button>
                         </div>
 
@@ -29,6 +29,10 @@
                 </form>
             </div>
         </div>
+
+        <h3>
+            <i class="fa fa-spin fa-spinner"></i> در حال بارگذاری ...
+        </h3>
     </div>
 </template>
 
@@ -43,10 +47,35 @@
             return {
                 digikalaLink: '',
                 loading: false,
+                importLoading: false,
+                productLoaded: false,
+                productInfo: {
+                    name: '',
+                    alternateName: '',
+                    imageArr: '',
+                    description: '',
+                    price: '',
+                },
             };
         },
 
         methods: {
+            checkSession () {
+                this.loading = true;
+                ajaxGet('/ajax/import-product/check-session').done(function (resp) {
+                    this.loading = false;
+                    if (resp.ok) {
+                        
+                    }
+                    else {
+                        swalWarning(resp.msg);
+                    }
+                }).fail(function (err) {
+                    this.loading = false;
+                    swalConnectionError();
+                });
+            },
+
             importProduct () {
                 if (!this.digikalaLink) {
                     swalWarning('لطفا لینک محصول را وارد کنید!',false);
@@ -54,17 +83,27 @@
                 }
 
                 this.loading = true;
+                this.importLoading = true;
                 let data = {digikala_link: this.digikalaLink};
                 ajaxPost('/ajax/import-product',data).done(function (resp) {
                     this.loading = false;
+                    this.importLoading = false;
                     if (resp.ok) {
-
+                        let data = resp.data;
+                        this.productLoaded = true;
+                        this.productInfo.name = data.name;
+                        this.productInfo.alternateName = data.alternate_name;
+                        this.productInfo.imageArr = data.image_arr;
+                        this.productInfo.description = data.description;
+                        this.productInfo.price = data.price;
+                        swalSuccess('اطلاعات محصول با موفقیت از دیجی کالا دریافت شد. لطفا اطلاعات را تکمیل کرده و محصول را ثبت کنید!');
                     }
                     else {
                         swalWarning(resp.msg);
                     }
                 }.bind(this)).fail(function (err) {
                     this.loading = false;
+                    this.importLoading = false;
                     swalConnectionError();
                 }.bind(this));
             },

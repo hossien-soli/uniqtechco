@@ -10,4 +10,5 @@ Route::as('main.')->group(function () {
 
 Route::prefix('/ajax')->group(function () {
     Route::post('/import-product','AjaxController@importProduct');
+    Route::get('/import-product/check-session','AjaxController@importProductCheckSession');
 });
