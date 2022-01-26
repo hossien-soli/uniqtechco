@@ -129,18 +129,141 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   mounted: function mounted() {
     $('#digikalaLink').focus();
     enInput();
+    this.checkSession();
   },
   data: function data() {
     return {
       digikalaLink: '',
-      loading: false
+      loading: false,
+      importLoading: false,
+      finalizeLoading: false,
+      productLoaded: false,
+      productInfo: {
+        name: '',
+        alternateName: '',
+        imageArr: [],
+        description: '',
+        price: ''
+      },
+      imageFilter: [],
+      publishFlag: false
     };
   },
   methods: {
+    checkSession: function checkSession() {
+      this.loading = true;
+      ajaxGet('/ajax/import-product/check-session').done(function (resp) {
+        this.loading = false;
+
+        if (resp.ok) {
+          var data = resp.data;
+
+          if (data.has) {
+            var info = data.info;
+            this.productInfo.name = info.name;
+            this.productInfo.alternateName = info.alternate_name;
+            this.productInfo.imageArr = info.image_arr;
+            this.productInfo.description = info.description;
+            this.productInfo.price = info.price;
+            this.digikalaLink = data.digikala_link;
+            this.imageFilter = [];
+
+            if (info.image_arr) {
+              for (var i = 0; i < info.image_arr.length; i++) {
+                this.imageFilter.push(1);
+              }
+            }
+
+            this.productLoaded = true;
+          }
+        } else {
+          swalWarning(resp.msg);
+        }
+      }.bind(this)).fail(function (err) {
+        this.loading = false;
+        swalConnectionError();
+      }.bind(this));
+    },
     importProduct: function importProduct() {
       if (!this.digikalaLink) {
         swalWarning('لطفا لینک محصول را وارد کنید!', false);
@@ -148,13 +271,114 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       this.loading = true;
+      this.importLoading = true;
       var data = {
         digikala_link: this.digikalaLink
       };
       ajaxPost('/ajax/import-product', data).done(function (resp) {
         this.loading = false;
+        this.importLoading = false;
 
-        if (resp.ok) {} else {
+        if (resp.ok) {
+          var _data = resp.data;
+          this.productInfo.name = _data.name;
+          this.productInfo.alternateName = _data.alternate_name;
+          this.productInfo.imageArr = _data.image_arr;
+          this.productInfo.description = _data.description;
+          this.productInfo.price = _data.price;
+          swalSuccess('اطلاعات محصول با موفقیت از دیجی کالا دریافت شد. لطفا اطلاعات را تکمیل کرده و محصول را ثبت کنید!');
+          this.imageFilter = [];
+
+          if (_data.image_arr) {
+            for (var i = 0; i < _data.image_arr.length; i++) {
+              this.imageFilter.push(1);
+            }
+          }
+
+          this.productLoaded = true;
+        } else {
+          swalWarning(resp.msg);
+        }
+      }.bind(this)).fail(function (err) {
+        this.loading = false;
+        this.importLoading = false;
+        swalConnectionError();
+      }.bind(this));
+    },
+    imageFilterDo: function imageFilterDo(index, action) {
+      this.imageFilter[index] = action;
+      this.$forceUpdate();
+    },
+    finalizeImportAndPublish: function finalizeImportAndPublish() {
+      this.publishFlag = true;
+      this.finalizeImport();
+    },
+    resetForm: function resetForm() {
+      this.digikalaLink = '';
+      this.productInfo.name = '';
+      this.productInfo.alternateName = '';
+      this.productInfo.imageArr = [];
+      this.productInfo.description = '';
+      this.productInfo.price = '';
+      this.imageFilter = [];
+      this.publishFlag = false;
+      this.productLoaded = false;
+    },
+    finalizeImport: function finalizeImport() {
+      if (!this.productInfo.name) {
+        swalWarning('لطفا نام محصول را وارد کنید!', false);
+        return;
+      }
+
+      if (!this.productInfo.price && this.productInfo.price !== 0 && this.productInfo.price !== '0') {
+        swalWarning('لطفا قیمت محصول را وارد کنید!', false);
+        return;
+      }
+
+      var imageFilterStr = '';
+
+      for (var i = 0; i < this.imageFilter.length; i++) {
+        imageFilterStr += this.imageFilter[i] + '#';
+      }
+
+      var data = {
+        product_name: this.productInfo.name,
+        product_alternate_name: this.productInfo.alternateName,
+        product_description: this.productInfo.description,
+        product_price: this.productInfo.price,
+        image_filter: imageFilterStr,
+        also_publish: this.publishFlag ? '1' : '0'
+      };
+      this.loading = true;
+      this.finalizeLoading = true;
+      ajaxPost('/ajax/import-product/finalize', data).done(function (resp) {
+        this.loading = false;
+        this.finalizeLoading = false;
+
+        if (resp.ok) {
+          swalSuccess('محصول با موفقیت در سیستم ثبت شد!');
+          this.resetForm();
+        } else {
+          swalWarning(resp.msg);
+
+          if (resp.reset) {
+            this.resetForm();
+          }
+        }
+      }.bind(this)).fail(function (err) {
+        this.loading = false;
+        this.finalizeLoading = false;
+        swalConnectionError();
+      }.bind(this));
+    },
+    cancelImport: function cancelImport() {
+      this.loading = true;
+      ajaxPost('/ajax/import-product/cancel').done(function (resp) {
+        this.loading = false;
+
+        if (resp.ok) {
+          this.resetForm();
+        } else {
           swalWarning(resp.msg);
         }
       }.bind(this)).fail(function (err) {
@@ -21610,8 +21834,8 @@ var render = function () {
                         {
                           name: "show",
                           rawName: "v-show",
-                          value: !_vm.loading,
-                          expression: "!loading",
+                          value: !_vm.importLoading,
+                          expression: "!importLoading",
                         },
                       ],
                       staticClass: "fa ml-1 fa-check",
@@ -21622,8 +21846,8 @@ var render = function () {
                         {
                           name: "show",
                           rawName: "v-show",
-                          value: _vm.loading,
-                          expression: "loading",
+                          value: _vm.importLoading,
+                          expression: "importLoading",
                         },
                       ],
                       staticClass: "fa ml-1 fa-spin fa-spinner",
@@ -21636,8 +21860,8 @@ var render = function () {
                           {
                             name: "show",
                             rawName: "v-show",
-                            value: !_vm.loading,
-                            expression: "!loading",
+                            value: !_vm.importLoading,
+                            expression: "!importLoading",
                           },
                         ],
                         staticClass: "font-samim-bold",
@@ -21652,8 +21876,8 @@ var render = function () {
                           {
                             name: "show",
                             rawName: "v-show",
-                            value: _vm.loading,
-                            expression: "loading",
+                            value: _vm.importLoading,
+                            expression: "importLoading",
                           },
                         ],
                         staticClass: "font-samim-medium",
@@ -21692,6 +21916,389 @@ var render = function () {
         ),
       ]),
     ]),
+    _vm._v(" "),
+    _c(
+      "h3",
+      {
+        directives: [
+          {
+            name: "show",
+            rawName: "v-show",
+            value: _vm.loading,
+            expression: "loading",
+          },
+        ],
+        staticClass: "py-5 text-center",
+      },
+      [
+        _c("i", { staticClass: "fa ml-1 fa-spin fa-spinner" }),
+        _vm._v(" در حال بارگذاری ...\n    "),
+      ]
+    ),
+    _vm._v(" "),
+    _vm.productLoaded
+      ? _c("div", [
+          _c(
+            "div",
+            _vm._l(_vm.productInfo.imageArr, function (imgLink, index) {
+              return _c(
+                "div",
+                {
+                  class: [
+                    "d-inline-block p-2 m-1 border",
+                    _vm.imageFilter[index] ? "border-success" : "border-danger",
+                  ],
+                },
+                [
+                  _c("img", { attrs: { width: "140", src: imgLink } }),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "text-center py-2" }, [
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn w-50 btn-sm btn-success",
+                        attrs: { disabled: _vm.loading },
+                        on: {
+                          click: function ($event) {
+                            return _vm.imageFilterDo(index, 1)
+                          },
+                        },
+                      },
+                      [_c("i", { staticClass: "fa fa-check" })]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn w-25 btn-sm btn-danger",
+                        attrs: { disabled: _vm.loading },
+                        on: {
+                          click: function ($event) {
+                            return _vm.imageFilterDo(index, 0)
+                          },
+                        },
+                      },
+                      [_c("i", { staticClass: "fa fa-times" })]
+                    ),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "mt-2" }, [
+                      !_vm.imageFilter[index]
+                        ? _c("span", { staticClass: "badge badge-danger" }, [
+                            _c("i", { staticClass: "fa fa-trash-alt" }),
+                            _vm._v(" حذف شد\n                        "),
+                          ])
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _vm.imageFilter[index]
+                        ? _c("span", { staticClass: "badge badge-success" }, [
+                            _c("i", { staticClass: "fa fa-reply" }),
+                            _vm._v(" ثبت خواهد شد\n                        "),
+                          ])
+                        : _vm._e(),
+                    ]),
+                  ]),
+                ]
+              )
+            }),
+            0
+          ),
+          _vm._v(" "),
+          _c("div", { staticClass: "mt-3 row" }, [
+            _c("div", { staticClass: "form-group col-md-6" }, [
+              _c("label", { attrs: { for: "productName" } }, [
+                _vm._v("نام محصول"),
+              ]),
+              _vm._v(" "),
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.productInfo.name,
+                    expression: "productInfo.name",
+                  },
+                ],
+                staticClass: "form-control",
+                attrs: {
+                  type: "text",
+                  disabled: _vm.loading,
+                  id: "productName",
+                  maxlength: "255",
+                  placeholder: "نام محصول را وارد کنید ...",
+                },
+                domProps: { value: _vm.productInfo.name },
+                on: {
+                  input: function ($event) {
+                    if ($event.target.composing) {
+                      return
+                    }
+                    _vm.$set(_vm.productInfo, "name", $event.target.value)
+                  },
+                },
+              }),
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "form-group pr-md-1 col-md-6" }, [
+              _c("label", { attrs: { for: "productAlternateName" } }, [
+                _vm._v("نام جایگزین محصول"),
+              ]),
+              _vm._v(" "),
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.productInfo.alternateName,
+                    expression: "productInfo.alternateName",
+                  },
+                ],
+                staticClass: "form-control",
+                attrs: {
+                  disabled: _vm.loading,
+                  type: "text",
+                  id: "productAlternateName",
+                  maxlength: "255",
+                  placeholder: "نام جایگزین محصول را وارد کنید ...",
+                },
+                domProps: { value: _vm.productInfo.alternateName },
+                on: {
+                  input: function ($event) {
+                    if ($event.target.composing) {
+                      return
+                    }
+                    _vm.$set(
+                      _vm.productInfo,
+                      "alternateName",
+                      $event.target.value
+                    )
+                  },
+                },
+              }),
+            ]),
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "form-group" }, [
+            _c("label", { attrs: { for: "productDescription" } }, [
+              _vm._v("توضیحات محصول"),
+            ]),
+            _vm._v(" "),
+            _c("textarea", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.productInfo.description,
+                  expression: "productInfo.description",
+                },
+              ],
+              staticClass: "form-control",
+              attrs: {
+                disabled: _vm.loading,
+                rows: "7",
+                placeholder: "توضیحات محصول را وارد کنید ...",
+                id: "productDescription",
+              },
+              domProps: { value: _vm.productInfo.description },
+              on: {
+                input: function ($event) {
+                  if ($event.target.composing) {
+                    return
+                  }
+                  _vm.$set(_vm.productInfo, "description", $event.target.value)
+                },
+              },
+            }),
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "row" }, [
+            _c("div", { staticClass: "form-group col-md-6" }, [
+              _c("label", { attrs: { for: "productPrice" } }, [
+                _vm._v("قیمت محصول"),
+              ]),
+              _vm._v(" "),
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.productInfo.price,
+                    expression: "productInfo.price",
+                  },
+                ],
+                staticClass: "form-control",
+                attrs: {
+                  disabled: _vm.loading,
+                  type: "number",
+                  id: "productPrice",
+                  placeholder: "قیمت محصول را وارد کنید ...",
+                },
+                domProps: { value: _vm.productInfo.price },
+                on: {
+                  input: function ($event) {
+                    if ($event.target.composing) {
+                      return
+                    }
+                    _vm.$set(_vm.productInfo, "price", $event.target.value)
+                  },
+                },
+              }),
+            ]),
+          ]),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn px-lg-5 btn-primary",
+              attrs: { disabled: _vm.loading, type: "button" },
+              on: { click: _vm.finalizeImport },
+            },
+            [
+              _c("i", {
+                directives: [
+                  {
+                    name: "show",
+                    rawName: "v-show",
+                    value: !_vm.finalizeLoading,
+                    expression: "!finalizeLoading",
+                  },
+                ],
+                staticClass: "fa ml-1 fa-check",
+              }),
+              _vm._v(" "),
+              _c("i", {
+                directives: [
+                  {
+                    name: "show",
+                    rawName: "v-show",
+                    value: _vm.finalizeLoading,
+                    expression: "finalizeLoading",
+                  },
+                ],
+                staticClass: "fa ml-1 fa-spin fa-spinner",
+              }),
+              _vm._v(" "),
+              _c(
+                "span",
+                {
+                  directives: [
+                    {
+                      name: "show",
+                      rawName: "v-show",
+                      value: !_vm.finalizeLoading,
+                      expression: "!finalizeLoading",
+                    },
+                  ],
+                  staticClass: "font-samim-bold",
+                },
+                [_vm._v("تایید و ثبت محصول")]
+              ),
+              _vm._v(" "),
+              _c(
+                "span",
+                {
+                  directives: [
+                    {
+                      name: "show",
+                      rawName: "v-show",
+                      value: _vm.finalizeLoading,
+                      expression: "finalizeLoading",
+                    },
+                  ],
+                  staticClass: "font-samim-medium",
+                },
+                [_vm._v("لطفا صبر کنید ...")]
+              ),
+            ]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn mx-2 px-lg-5 btn-success",
+              attrs: { disabled: _vm.loading, type: "button" },
+              on: { click: _vm.finalizeImportAndPublish },
+            },
+            [
+              _c("i", {
+                directives: [
+                  {
+                    name: "show",
+                    rawName: "v-show",
+                    value: !_vm.finalizeLoading,
+                    expression: "!finalizeLoading",
+                  },
+                ],
+                staticClass: "fa ml-1 fa-check-double",
+              }),
+              _vm._v(" "),
+              _c("i", {
+                directives: [
+                  {
+                    name: "show",
+                    rawName: "v-show",
+                    value: _vm.finalizeLoading,
+                    expression: "finalizeLoading",
+                  },
+                ],
+                staticClass: "fa ml-1 fa-spin fa-spinner",
+              }),
+              _vm._v(" "),
+              _c(
+                "span",
+                {
+                  directives: [
+                    {
+                      name: "show",
+                      rawName: "v-show",
+                      value: !_vm.finalizeLoading,
+                      expression: "!finalizeLoading",
+                    },
+                  ],
+                  staticClass: "font-samim-bold",
+                },
+                [_vm._v("ثبت و انتشار محصول")]
+              ),
+              _vm._v(" "),
+              _c(
+                "span",
+                {
+                  directives: [
+                    {
+                      name: "show",
+                      rawName: "v-show",
+                      value: _vm.finalizeLoading,
+                      expression: "finalizeLoading",
+                    },
+                  ],
+                  staticClass: "font-samim-medium",
+                },
+                [_vm._v("لطفا صبر کنید ...")]
+              ),
+            ]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn px-lg-5 btn-secondary",
+              attrs: { disabled: _vm.loading, type: "button" },
+              on: { click: _vm.cancelImport },
+            },
+            [
+              _c("i", { staticClass: "fa ml-1 fa-times" }),
+              _vm._v(" "),
+              _c("span", { staticClass: "font-samim-bold" }, [
+                _vm._v("انصراف و نادیده گرفتن محصول"),
+              ]),
+            ]
+          ),
+        ])
+      : _vm._e(),
+    _vm._v(" "),
+    _c("br"),
+    _c("br"),
+    _c("br"),
+    _c("br"),
   ])
 }
 var staticRenderFns = []

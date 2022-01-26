@@ -174,5 +174,10 @@ return [
         'size'                  => 'اندازه',
         'terms'                 => 'شرایط',
         'province'              => 'استان',
+
+        'product_name' => 'نام محصول',
+        'product_alternate_name' => 'نام جایگزین محصول',
+        'product_description' => 'توضیحات محصول',
+        'product_price' => 'قیمت محصول',
     ],
 ];

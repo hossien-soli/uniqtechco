@@ -13,7 +13,7 @@ class CreateProductImagesTable extends Migration
             $table->bigInteger('product_id')->unsigned()->index();
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade')->onUpdate('cascade');
             $table->string('name'); // path: public/products/<product_uniq_id>/<image_name>
-            $table->boolean('main_image'); // product main image
+            $table->boolean('main_image')->default(0); // product main image
             $table->boolean('hidden')->default(0);
             $table->text('link_on_digikala')->nullable();
             $table->timestamps();
